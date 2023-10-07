@@ -6,6 +6,9 @@ import (
 	todo_app "todo-app"
 )
 
+// signUp godoc
+// @Summary			Sign Up
+// @Description		Sign Up
 func (h *Handler) signUp(c *gin.Context) {
 	var input todo_app.User
 
@@ -30,6 +33,9 @@ type signInInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// signIn godoc
+// @Summary			Sign In
+// @Description		Sign In
 func (h *Handler) signIn(c *gin.Context) {
 	var input signInInput
 

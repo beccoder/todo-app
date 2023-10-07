@@ -2,6 +2,8 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"todo-app/pkg/service"
 )
 
@@ -15,6 +17,8 @@ func NewHandler(services *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+	// add swagger
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	auth := router.Group("/auth")
 	{
@@ -33,5 +37,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			lists.DELETE("/:id", h.deleteList)
 		}
 	}
+
 	return router
 }

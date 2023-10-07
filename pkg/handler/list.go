@@ -7,6 +7,9 @@ import (
 	todo_app "todo-app"
 )
 
+// createList godoc
+// @Summary 			Create a new Todo list
+// @Description 		Create a new Todo list with the privided data
 func (h *Handler) createList(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
@@ -34,6 +37,9 @@ type getAllListsResponse struct {
 	Data []todo_app.TodoList `json:"data"`
 }
 
+// getAllLists godoc
+// @Summary 			List all Todo lists
+// @Description 		Get a list of all Todo lists
 func (h *Handler) getAllLists(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
@@ -51,6 +57,9 @@ func (h *Handler) getAllLists(c *gin.Context) {
 	})
 }
 
+// getListById godoc
+// @Summary 			Get a List by ID
+// @Description 		Get single Todo list by providing its unique ID
 func (h *Handler) getListById(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
@@ -72,6 +81,9 @@ func (h *Handler) getListById(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
+// updateList godoc
+// @Summary 			Update an existing Todo list
+// @Description 		Update an existing Todo list with the provided data
 func (h *Handler) updateList(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
@@ -98,6 +110,9 @@ func (h *Handler) updateList(c *gin.Context) {
 	c.JSON(http.StatusOK, statusResponse{"ok"})
 }
 
+// deleteList godoc
+// @Summary				Delete an existing Todo list
+// @Description			Delete an existing Todo list by ID
 func (h *Handler) deleteList(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {

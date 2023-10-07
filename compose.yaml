@@ -1,11 +1,11 @@
 services:
   todo-app:
     build: ./
-    command: ./wait-for-postgres.sh db ./todo-app
+    command: ./todo-app
     ports:
       - 8000:8000
     depends_on:
-      - db
+      - migrate
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
 
@@ -19,13 +19,16 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     ports:
       - 5435:5432
 
   migrate:
     image: migrate/migrate
-    profiles:
-      - tools
     volumes:
       - ./migrations:/migrations
     entrypoint:
@@ -38,7 +41,8 @@ services:
       ]
     command: [ "up" ]
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: on-failure
 
 volumes:

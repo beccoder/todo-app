@@ -10,11 +10,18 @@ import (
 	"os/signal"
 	"syscall"
 	todo_app "todo-app"
+	_ "todo-app/docs"
 	"todo-app/pkg/handler"
 	"todo-app/pkg/repository"
 	"todo-app/pkg/service"
 )
 
+// @title ToDoApp Service API
+// @version 1.0
+// @description ToDoApp Service Api in Go using Gin framework
+
+// @host	localhost:8000
+// @BasePath	/
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 	if err := initConfig(); err != nil {
