@@ -7,17 +7,40 @@ services:
     depends_on:
       - db
     environment:
-      - DB_PASSWORD=qwerty
+      - DB_PASSWORD=${DB_PASSWORD}
 
   db:
-    restart: always
     image: postgres:latest
+    restart: always
     volumes:
       - ./.database/postgres/data:/var/lib/postgresql/data
+      - ./migrations/000001_init.up.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
-      - POSTGRES_PASSWORD=qwerty
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=todo
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=postgres
     ports:
-      - 5436:5432
+      - 5435:5432
+
+  migrate:
+    image: migrate/migrate
+    profiles:
+      - tools
+    volumes:
+      - ./migrations:/migrations
+    entrypoint:
+      [
+        "migrate",
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://postgres:${DB_PASSWORD}@db:5432/postgres?sslmode=disable",
+      ]
+    command: [ "up" ]
+    depends_on:
+      - db
+    restart: on-failure
+
+volumes:
+  .database:
 

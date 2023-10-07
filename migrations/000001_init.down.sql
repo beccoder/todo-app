@@ -1,5 +1,5 @@
-DROP TABLE users_lists;
+DROP TABLE IF EXISTS users_lists;
 
-DROP TABLE todo_lists;
+DROP TABLE IF EXISTS todo_lists;
 
-DROP TABLE users;
+DROP TABLE IF EXISTS users;
