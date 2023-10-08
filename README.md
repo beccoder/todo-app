@@ -57,7 +57,7 @@ To access certain API endpoints that require authentication, you will need to cr
 - `name`: Your desired name
 - `username`: Your desired username
 - `password`: Your desired password
-- 
+
 2. After successfully registering, you can obtain an authentication token by making a POST request to `http://localhost:8000/auth/sign-in` with your username and password. This will return a JSON response containing an access token.
 3. Include the access token in the `Authorization` header of your requests to authenticated endpoints. For example:
 ```bash
