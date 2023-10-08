@@ -8,7 +8,17 @@ import (
 
 // signUp godoc
 // @Summary			Sign Up
-// @Description		Sign Up
+// @Tags 			Auth
+// @Description		Create account
+// @ID 				create-account
+// @Accept 			json
+// @Produce 		json
+// @Param 			input body todo_app.User true "account info"
+// @Success 		200 {integer} integer 1
+// @Failure 		400,404 {object} errorResponse
+// @Failure			500 {object} errorResponse
+// @Failure 		default {object} errorResponse
+// @Router 			/auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
 	var input todo_app.User
 
@@ -35,7 +45,17 @@ type signInInput struct {
 
 // signIn godoc
 // @Summary			Sign In
-// @Description		Sign In
+// @Tags 			Auth
+// @Description		Login
+// @ID 				login
+// @Accept 			json
+// @Produce 		json
+// @Param 			input body signInInput true "credentials"
+// @Success 		200 {string} string "token"
+// @Failure 		400,404 {object} errorResponse
+// @Failure			500 {object} errorResponse
+// @Failure 		default {object} errorResponse
+// @Router 			/auth/sign-in [post]
 func (h *Handler) signIn(c *gin.Context) {
 	var input signInInput
 

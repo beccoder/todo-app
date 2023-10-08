@@ -16,12 +16,16 @@ import (
 	"todo-app/pkg/service"
 )
 
-// @title ToDoApp Service API
+// @title ToDoApp Server API
 // @version 1.0
-// @description ToDoApp Service Api in Go using Gin framework
+// @description ToDoApp Server Api in Go using Gin framework
 
-// @host	localhost:8000
-// @BasePath	/
+// @host localhost:8000
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 	if err := initConfig(); err != nil {
