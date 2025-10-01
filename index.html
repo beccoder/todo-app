@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Todo List App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        input, button, textarea {
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            cursor: pointer;
+            background: #007bff;
+            color: #fff;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .todo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .done {
+            text-decoration: line-through;
+            color: gray;
+        }
+        .actions button {
+            margin-left: 5px;
+            padding: 5px 8px;
+            font-size: 12px;
+        }
+
+        /* Popup styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .tabs button {
+            flex: 1;
+            padding: 10px;
+            background: #8EC5FF;
+            border: none;
+            border-bottom: 2px solid transparent;
+        }
+        .tabs button.active {
+            background: #2B7FFF;
+            border-bottom: 2px solid #007bff;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+
+        /* Logout button */
+        #logoutBtn {
+            margin-bottom: 10px;
+            background: #dc3545;
+        }
+        #logoutBtn:hover {
+            background: #b02a37;
+        }
+    </style>
+</head>
+<body>
+<h1>Todo List</h1>
+<div class="container">
+    <button id="logoutBtn" onclick="logout()">Logout</button>
+
+    <h2>Add Todo</h2>
+    <input id="title" placeholder="Title">
+    <textarea id="description" placeholder="Description"></textarea>
+    <button onclick="addTodo()">Add Todo</button>
+
+    <h2>Todo List</h2>
+    <div id="todo-list"></div>
+</div>
+
+<!-- Auth Modal -->
+<div class="modal" id="authModal">
+    <div class="modal-content">
+        <div class="tabs">
+            <button id="tabSignIn" class="active" onclick="showTab('signin')">Sign In</button>
+            <button id="tabSignUp" onclick="showTab('signup')">Sign Up</button>
+        </div>
+        <div id="signinForm">
+            <input id="siUsername" placeholder="Username">
+            <input id="siPassword" type="password" placeholder="Password">
+            <button onclick="signIn()">Sign In</button>
+        </div>
+        <div id="signupForm" class="hidden">
+            <input id="suName" placeholder="Name">
+            <input id="suUsername" placeholder="Username">
+            <input id="suPassword" type="password" placeholder="Password">
+            <button onclick="signUp()">Sign Up</button>
+        </div>
+    </div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal" id="updateModal">
+    <div class="modal-content">
+        <h3>Edit Todo</h3>
+        <input id="updTitle" placeholder="Title">
+        <textarea id="updDescription" placeholder="Description"></textarea>
+        <label>
+            <input type="checkbox" id="updDone"> Done
+        </label>
+        <button onclick="saveUpdate()">Save</button>
+        <button onclick="closeUpdateModal()">Cancel</button>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8000";
+    let token = localStorage.getItem("token") || "";
+    let editingId = null;
+
+    /* ---------- AUTH ---------- */
+    function showModal() {
+        document.getElementById("authModal").style.display = "flex";
+    }
+    function hideModal() {
+        document.getElementById("authModal").style.display = "none";
+    }
+    function showTab(tab) {
+        document.getElementById("signinForm").classList.add("hidden");
+        document.getElementById("signupForm").classList.add("hidden");
+        document.getElementById("tabSignIn").classList.remove("active");
+        document.getElementById("tabSignUp").classList.remove("active");
+        if (tab === "signin") {
+            document.getElementById("signinForm").classList.remove("hidden");
+            document.getElementById("tabSignIn").classList.add("active");
+        } else {
+            document.getElementById("signupForm").classList.remove("hidden");
+            document.getElementById("tabSignUp").classList.add("active");
+        }
+    }
+    async function signUp() {
+        const res = await fetch(`${API_URL}/auth/sign-up`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username: document.getElementById("suUsername").value,
+                password: document.getElementById("suPassword").value,
+                name: document.getElementById("suName").value
+            })
+        });
+        await res.json();
+        alert("Signed up! Now sign in.");
+        showTab("signin");
+    }
+    async function signIn() {
+        const res = await fetch(`${API_URL}/auth/sign-in`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username: document.getElementById("siUsername").value,
+                password: document.getElementById("siPassword").value
+            })
+        });
+        const data = await res.json();
+        if (data.token) {
+            token = data.token;
+            localStorage.setItem("token", token);
+            hideModal();
+            getTodos();
+        } else {
+            alert("Invalid credentials");
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        token = '';
+        showModal();
+        document.getElementById("todo-list").innerHTML = "";
+    }
+
+    /* ---------- TODOS ---------- */
+    async function addTodo() {
+        if (!token) return showModal();
+        await fetch(`${API_URL}/api/lists`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({
+                title: document.getElementById("title").value,
+                description: document.getElementById("description").value,
+                done: false
+            })
+        });
+        getTodos();
+    }
+
+    async function getTodos() {
+        if (!token) return showModal();
+        const res = await fetch(`${API_URL}/api/lists`, {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await res.json();
+        const container = document.getElementById("todo-list");
+        container.innerHTML = "";
+        data.data.forEach(todo => {
+            const div = document.createElement("div");
+            div.className = "todo";
+            div.innerHTML = `
+          <span class="${todo.done ? "done" : ""}">
+            <b>${todo.title}</b>: ${todo.description}
+          </span>
+          <div class="actions">
+            <button onclick="openUpdateModal(${todo.id}, '${todo.title}', '${todo.description}', ${todo.done})">Edit</button>
+            <button onclick="toggleDone(${todo.id}, ${todo.done})">${todo.done ? "Undo" : "Done"}</button>
+            <button onclick="deleteTodo(${todo.id})">Delete</button>
+          </div>
+        `;
+            container.appendChild(div);
+        });
+    }
+
+    async function toggleDone(id, currentDone) {
+        // Fetch actual todo
+        const res = await fetch(`${API_URL}/api/lists/${id}`, {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        const todo = await res.json();
+
+        // Update done without overwriting title/description
+        await fetch(`${API_URL}/api/lists/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({
+                title: todo.title,
+                description: todo.description,
+                done: !currentDone
+            })
+        });
+        getTodos();
+    }
+
+    async function deleteTodo(id) {
+        await fetch(`${API_URL}/api/lists/${id}`, {
+            method: "DELETE",
+            headers: { "Authorization": "Bearer " + token }
+        });
+        getTodos();
+    }
+
+    /* ---------- UPDATE MODAL ---------- */
+    function openUpdateModal(id, title, desc, done) {
+        editingId = id;
+        document.getElementById("updTitle").value = title;
+        document.getElementById("updDescription").value = desc;
+        document.getElementById("updDone").checked = done;
+        document.getElementById("updateModal").style.display = "flex";
+    }
+    function closeUpdateModal() {
+        document.getElementById("updateModal").style.display = "none";
+        editingId = null;
+    }
+    async function saveUpdate() {
+        if (!editingId) return;
+        await fetch(`${API_URL}/api/lists/${editingId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({
+                title: document.getElementById("updTitle").value,
+                description: document.getElementById("updDescription").value,
+                done: document.getElementById("updDone").checked
+            })
+        });
+        closeUpdateModal();
+        getTodos();
+    }
+
+    /* ---------- INIT ---------- */
+    if (!token) {
+        showModal();
+    } else {
+        getTodos();
+    }
+</script>
+</body>
+</html>

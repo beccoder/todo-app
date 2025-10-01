@@ -10,7 +10,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
 
   db:
-    image: postgres:latest
+    image: postgres:15
     restart: always
     volumes:
       - ./.database/postgres/data:/var/lib/postgresql/data
